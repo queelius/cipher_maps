@@ -72,7 +72,7 @@ Input ($\mathbb{X}$) & Output ($\mathbb{Y}$)\\
 
 \begin{table}
 \centering
-\caption{Function $\operatorname{f} \colon \X \mapsto \Y$\\defined over a \emph{finite} domain $\X$ such that if $y_j = \operatorname{f}(x_j)$, $b_j = \Encode_{\Y}(\operatorname{f}(x_j)) = b_j$ and $y_j = \Decode_{\Y}(b_j)$.}
+\caption[short title]{Function $\operatorname{f} \colon \X \mapsto \Y$\\defined over a \emph{finite} domain $\X$ such that if $y_j = \operatorname{f}(x_j)$, $b_j = \Encode_{\Y}(\operatorname{f}(x_j)) = b_j$ and $y_j = \Decode_{\Y}(b_j)$.}
 \label{tbl:tabfunc}
 \begin{tabular}{|c c c|} 
 \hline
@@ -93,16 +93,16 @@ The oblivious map is given by the following definition.
 \begin{definition}
 The \gls{gls-obliviousmap} abstract data type is a specialization of the approximate map. We denote an oblivious map of $\Mt$ by $\Mpp$. An \emph{oblivious map} $\Mpp$ of $\Mt$ must satisfy the following conditions:
 \begin{enumerate}
-    \item $\Mpp$ is an \gls{gls-approxmap} of $\Mt$ with a specified false positive rate $\varepsilon$.
-    \item There is no way to efficiently iterate over the keys in $\Mpp$.
-    \item If a key is a false positive, it does not map to a value for a positive key (except by random chance). TODO: calculate the probability that a false positive key is randomly assigned a value that a positive key maps to.
-    \item A mapping (row in the table) may only be learned upon specifically requesing the value for a key.
-    \item Any estimator of the cardinality of $\Mt$ (if \Count is not provided) that only uses the information in the binary representation of a data structure implementing an $\Mpp$ may only be able determine an approximate specifiable upper-bound $u \geq m$.
+    \item $\AT{f} \colon \AT{X \mapsto Y}$ is a random approximate map of $f \colon X \mapsto Y$ with a specified false positive rate $\varepsilon$.
+    \item There is no way to efficiently iterate over the domain of definition $X$.
+    \item If an element of $x \in X$ is not in the domain of definition, $f(x)$ is a random oracle over $Y$
+    \item A particular mapping $y = f(x)$ may only be learned by evaluating the function $f(x)$.
+    \item Any estimator of the cardinality of the domain of definition that only uses the information in an object's binary representation may only be able determine an approximate specifiable upper-bound $u \geq m$ as a function of the entropy and the \emph{efficiency} of the representation, i.e., the most efficient representation has a very precise estimator of the cardinality of the domain of definition.
 \end{enumerate}
 \end{definition}
 In an \emph{oblivious map}, a mapping (row in the table) is only learned upon request.
 
-By \Cref{}, the space complexity of the \emph{oblivious map} with a false positive rate $\varepsilon > 0$ and a false negative rate $\eta = 0$ is given by the following postulate.
+By \cref{dummyref}, the space complexity of the \emph{oblivious map} with a false positive rate $\varepsilon > 0$ and a false negative rate $\eta = 0$ is given by the following postulate.
 \begin{postulate}
 Space complexity
 \begin{equation}
