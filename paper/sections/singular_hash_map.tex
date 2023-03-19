@@ -1,0 +1,254 @@
+\documentclass[ ../main.tex]{subfiles}
+\providecommand{\mainx}{..}
+\begin{document}
+\section{The \emph{Singular Hash Map}}
+The \emph{Singular Hash Set} is a theoretical data structure that provides an \emph{optimal} implementation of the \emph{oblivious map} abstract data type. A more practical implementation is given by the \emph{Perfect Map Filter}\cite{pmf}.
+
+We consider sets in which the universe of elements is given by the \emph{countably infinite} set of all bit strings.
+\begin{definition}
+The countably infinite set of all bit strings is denoted by
+\begin{equation}
+    \cisb = \left\{b \colon b \in \left\{0,1\right\}^*\right\}\,,
+\end{equation}
+where $*$ denotes all non-negative integers.
+\end{definition}
+A \emph{finite} subset of $\cisb$ is given by the following definition.
+\begin{definition}
+The \emph{finite set} of all bit strings of length $n$ is denoted by
+\begin{equation}
+    \cisb_n = \left\{b \colon b \in \left\{0,1\right\}^n\right\}
+\end{equation}
+with a cardinality given by
+\begin{equation}
+    \card{\cisb_n} = 2^n\,.
+\end{equation}
+\end{definition}
+
+A \emph{hash function} is related to countable sets $\cisb$ and $\cisb_n$ and is given by the following definition.
+\begin{definition}
+A \emph{hash function} $\hash \colon \cisb \mapsto \cisb_n$ is a function such that all bit strings of arbitrary-length are mapped (hashed) to bit strings of fixed-length $n$.
+\end{definition}
+For a given $x \in \cisb$, $y = \hash{x} \in \cisb_n$ is denoted the \emph{hash} of $x$.
+
+
+
+
+
+
+
+
+
+The \gls{gls-shmap} depends on a random oracle as given by the following definition.
+\begin{definition}
+\label{def:randomoracle}
+A random oracle, denoted by $\ro \colon \cisb \mapsto \cisb_n$, is a theoretical \emph{hash function} whose output is uniformly distributed over the elements of $\cisb_n$.
+\end{definition}
+\begin{assumption}
+The hash function $\hash$ approximates a random oracle $\ro$ and has a space complexity given by $\mathcal{O}(1)$.
+\end{assumption}
+
+The bit length of objects is given by the following definition.
+\begin{definition}
+The bit length of an object $x$ is denoted by
+\begin{equation}
+    \BL(x)\,.
+\end{equation}
+\end{definition}
+For example, the bit length of an object $x \in \cisb_n$ is given by $\BL(x) = n$.
+
+\begin{algorithm}[h]
+    \caption{Theoretical implementation of \protect\MakeApproxMap}
+    \label{alg:shmap}
+    \SetKwProg{func}{function}{}{}
+    \KwIn
+    {
+        $\Fun = \{\left(x,\Fun(x)\right) \colon x \in \X \}$ is the function defined as a set of ordered pairs, $\varepsilon$ is the \emph{false positive} domain error rate, and $\eta$ is the \emph{false negative} domain error rate.
+    }
+    \KwOut
+    {
+        An \emph{oblivious} function $\Afun$ with an approximate domain with a \emph{false positive} rate $\varepsilon$ and \emph{false negative} rate less than or equal to $\eta$.
+    }
+    \SetKwData{found}{found}
+    \SetKwData{truecode}{true\_code}
+    \SetKwData{code}{test\_code}
+    \func{\MakeApproxMap{$\Fun$, $\varepsilon$}}
+    {
+        $\Mt_{\cisb \times \cisb} \gets \left\{\left(\Encode_{\X \mapsto \cisb}\!\left(x\right),\Encode_{\Y \mapsto \cisb}(\Fun(x))\right) \colon x \in \X\right\}$\;
+        $p \gets (1 - \eta) \card{\X}$\;
+        $k \gets -\log_2 \varepsilon$\;
+        \For{$n \gets 0$ \KwTo $\infty$}
+        {
+            $\found \gets \True$\;
+            \For{$j \gets 1$ \KwTo $2^n$}
+            {
+                $b_n \gets$ draw random bit string of length $n$ from $\cisb_n$ without replacement\;
+                $\hash(z) \equiv \ro(z \catop b_n)$\;
+                \tcp{A minimum of $p$ inputs must have the same
+                hash.}
+                $\mathbb{M} \gets \text{all subsets of $p$ elements from $\Mt_{\cisb \times \cisb}$}$\;
+                \For{$\mathbb{P} \in \mathbb{M}$}
+                {
+                    \tcp{Let the $p$ elements in $\mathbb{P}$ be denoted by $\left(x^{(1)}, y^{(1)}\right),\ldots,\left(x^{(p)},y^{(p)}\right)$.}
+                    $h_k \gets \hash(x) \mod k$\;
+                    \For{$i \gets 2$ \KwTo $p$}
+                    {
+                        \If{$\hash(x^{(i)}) \mod k \neq h_k$}
+                        {
+                            $\found \gets \False$\;
+                        }
+                        \tcp{$\Encode_{\mathbb{Y} \mapsto \cisb}$ is a {self-delimiting} coder so we only check that the first $\BL(y^{(i)})$ bits of the hash are equal to $y^{(i)}$.}
+                        $\code \gets \hash(1 \catop x_i) \mod \BL(y^{(i)})$\;
+                        \If{$\code \neq y^{(i)}$}
+                        {
+                            \label{line:selfterm}
+                            $\found \gets \False$\;
+                        }
+                    }
+                    \If{\found}
+                    {
+                        \tcp{This tuple codes the \gls*{gls-shmap}.}
+                        \Return $(h_k,b_n)$\;
+                    }
+                }
+            }
+        }
+    }
+\end{algorithm}
+
+\begin{algorithm}[h]
+    \caption{Theoretical implementation of \protect\Find}
+    \label{alg:shmapfind}
+    \SetKwProg{func}{function}{}{}
+    \KwIn
+    {
+        $\Mp \in \mathbb{X} \times \mathbb{Y}$ is the \emph{\gls{gls-shmap}} with a \emph{\gls{gls-fprate}} $\varepsilon$.
+    }
+    \KwOut
+    {
+        If $x \in \mathbb{X}$ is a key in $\Mt$, then the \emph{value} in $\mathbb{Y}$ mapped to by $x$ is returned. Otherwise, with probability $\varepsilon$, $k$ is a false positive and maps to a \emph{random} bit string and with probability $1-\varepsilon$, the \emph{null value} is returned.
+    }
+    
+    \SetKwData{Code}{code}
+    \SetKwData{Success}{success}
+    \func{\Find{$\Mp$, $x$}}
+    {
+        \tcp{The \emph{\gls{gls-shmap}} is coded by the tuple $(h_1,b_n)$ as given by \Cref{alg:shmap}.}
+        $\ell \gets \BL(h_1)$\;
+        $\Code_x \gets \Encode_{\mathbb{X} \mapsto \cisb}(x)$\;
+        \If{$\hash(\Code_x) \mod \ell \neq h_1$}
+        {
+            \Return \nullvalue\;
+        }
+        
+        
+        $\Code_{x'} \gets \hash(1 \catop x) \mod j$\;
+        \tcp{We assume the true code associated with $x$ is the result of a \emph{self-delimiting} coder which can be decoded by $\Decode \colon \cisb \mapsto \mathbb{Y}$.}
+        $(\Success, y) \gets \Decode_{\cisb \mapsto \mathbb{Y}}(\Code_y)$\;
+        \If{\Success}
+        {
+            \tcp{Since $k$ may be a false positive, $v$ may be a random bit string with a length $\ell \in [c,N], 0 \leq c \leq N$, where $c$ depends upon the self-delimiting coder.}
+            \Return $y$\;
+        }
+    }
+\end{algorithm}
+
+
+\begin{figure}
+    \centering
+    %\input{img/fig_shmap.tex}
+    \caption{\emph{Singular Hash Map}}
+    \label{fig:shmap}
+\end{figure}
+
+We consider a family of \emph{approximate maps} which are given by the output of the random oracle applied to the input $x \in \Mt$ concatenated with a bit string $b \in \cisb$ such that all $x \in \St$ map to the same hash. We describe the generative algorithm in \Cref{alg:ph}. Note that in \Cref{alg:shmap}, the concatenation of two bit strings $x$ and $y$ is denoted by $x \catop y$.
+
+
+In \Cref{alg:shmap} on \Cref{line:selfterm}, the value $v_i$ has a \emph{self-terminating} encoding. Thus, we need only check that the bit string that encodes $v_i$ is equal to a hash of the key (concatenated with another $1$ and another bit string $b$).
+
+
+The space required for the \gls{gls-shmap} found by \Cref{alg:shmap} is of the order of the length $n$ of the bit string $b$. Therefore, for space efficiency, the algorithm exhaustively searches for a bit string in the order of increasing size $n$.
+
+\subsection{Theoretical analysis}
+The \gls{gls-set} proves that the keys in $\Mp$ are an \emph{approximate set} of the keys in $\Mt$.
+
+\begin{theorem}
+The probability that a particular bit string $b \in \cisb$ successfully codes the \gls{gls-shmap} is given by
+\begin{equation}
+    p(m,\varepsilon,\mu) = \frac{\varepsilon^{m-1}}{2^{m \mu}}\,.
+\end{equation}
+\end{theorem}
+\begin{proof}
+In \Cref{alg:shmap}, for a particular bit string $b_n$, the joint probability that every key in $\Mt$ collides and for each key $k$ in $\Mt$, the concatenation of $1$ and $k$ has a hash in which the first $\BL(v)$ bits collide with mapped value $v$ is given by the following reasoning.
+
+Suppose we have a set $\Mt = \{(k_1,v_1),\ldots,(k_m,v_m)\}$ and $k_1$ hashes to $y = \hash(k_1) \mod t$, where $\hash \colon \cisb^* \mapsto \cisb_N$ is a random hash function that uniformly distributes over its domain of $2^N$ possibilities and $N < \max{\BL(v_1),\ldots,\BL(v_m)}$.
+
+The probability that $\hash(1 \catop k_1) \mod \BL(v_1) = v_1$ is given by
+\begin{equation}
+    \frac{1}{2^{\BL(v_1)}}\,.
+\end{equation}
+Since $y$ is a particular element in $\cisb_k$, the probability that $k_j, j \neq 1$, hashes to $y$ is given by
+\begin{equation}
+    \frac{1}{2^k}\,.
+\end{equation}
+The probability that $1 \catop k_j, j \neq 1$ hashes to $v_j$ is given by
+\begin{equation}
+    \frac{1}{2^{\BL(v_j)}}\,.
+\end{equation}
+Since $\hash$ is a random hash function, every one of these probabilities are independent, and thus the joint probability is just the product given by
+\begin{align}
+    p &= \frac{1}{2^{k(m-1)}} \prod_{j=1}^{m} \frac{1}{2^{\BL(v_j)}}\\
+      &= \varepsilon^{m-1} \frac{1}{2^{\sum_{j=1}^{m} \BL(v_j)}}\,.
+\end{align}
+The average bit length per key is given by
+\begin{equation}
+    \mu = \frac{1}{m} \sum_{j=1}^{m} \BL(v_j)
+\end{equation}
+and thus the probability $p$ may be parameterized as
+\begin{equation}
+    p = \frac{\varepsilon^{m-1}}{2^{m \mu}}\,.
+\end{equation}
+\end{proof}
+
+\begin{theorem}
+Given \emph{false positive} and \emph{false negative} domain error rates given by $\varepsilon$ and $\eta$ respectively, and a mean bit length $\mu$ of encodings of elements in the image of $\Afun$, the \emph{expected} bit length of the Singular Hash Map asymptotically obtains a space complexity with a lower-bound given by
+\begin{equation}
+    -(1 - \eta) \log_2 \varepsilon + (1 - \eta) \mu \; \si{bits \per element}\,,
+\end{equation}
+which occurs when the encodings have uniformly distributed bit lengths, and an upper-bound given by
+\begin{equation}
+    -(1 - \eta) \log_2 \varepsilon + \mu \; \si{bits \per element}\,,
+\end{equation}
+which occurs when the encodings have degenerate bit lengths. The greater the entropy of the bit lengths, the smaller the expected bit length given a mean of $\mu$. 
+\end{theorem}
+\begin{proof}
+The space required for the \gls{gls-shs} found by \Cref{alg:makeset} is of the order of the length $n$ of the bit string $b_n$. Therefore, for space efficiency, the algorithm exhaustively searches for a bit string in the order of increasing size $n$.
+
+We are interested in the first case when a success occurs, which is a geometric distribution with probability of success $p$ as given by
+\begin{equation}
+    \rv{Q} \sim \geodist\!\left(p = \frac{\varepsilon^{m-1}}{2^{m \mu}}\right)\,.
+\end{equation}
+The expected number of trials for the geometric distribution is given by
+\begin{equation}
+\label{eq:exp_trials}
+    \expectation\left[\rv{Q}\right] = \frac{2^{m \mu}}{\varepsilon^{m-1}}\,.
+\end{equation}
+By \Cref{def:mapping}, the \nth trial uniquely maps to a bit string of length $m = \lfloor \log_2 n \rfloor$. Thus, the expected bit length is given approximately by
+\begin{equation}
+    \expectation[\log_2 \rv{Q}] = \log_2 \frac{2^{m \mu}}{\varepsilon^{m-1}}\; \si{bits}\,.
+\end{equation}
+Dividing by $m$ and simplifying results in
+\begin{equation}
+    -\frac{m-1}{m} \log_2 \varepsilon + \mu\; \si{bits \per element}\,.
+\end{equation}
+Asymptotically, as $m \to \infty$, the bits per element goes to
+\begin{equation}
+    -\log_2 \varepsilon + \mu\,.
+\end{equation}
+\end{proof}
+
+The smaller the bit lengths generated by the encoder, the smaller the \emph{Singular Hash Map}. However, optimal encoders \emph{reveal} information about the values in the \emph{Singular Hash Map}, which goes against the principle of the \emph{obvlivious function}. For instance, if each input $x$ mapped to a list of numbers, then an optimal encoder will generate codes that minimize the length of the list, say a Huffman code. However, by analyzing the Huffman codes produced by the encoder, we may infer the distribution of the lists. Thus, for the sake of maintaining an \emph{oblivious} state, the encoder should generate codes as though the values were \emph{uniformly} distributed.
+
+\subsection{Entropy}
+
+
+\end{document}
