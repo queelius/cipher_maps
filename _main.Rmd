@@ -1,0 +1,356 @@
+---
+title: "Universal function Bernoulli approximators "
+output: 
+ bookdown::pdf_book:
+        toc: true
+        #latex_engine: xelatex
+        #toc_depth: 3
+        number_sections: true
+        #extra_dependencies: ["hyperref", "graphicx","amsthm","amsmath","natbib","tikz"]
+        extra_dependencies: ["tikz", "caption", "amsthm", "amsmath"]
+        df_print: kable
+        #keep_tex: true
+        citation_package: natbib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Oblivious maps {#sec:map}
+=========================
+A set is an unordered collection of distinct elements, typically from some implicitly understood universe.
+A countable set is a *finite set* or a *countably infinite set*. A *finite set* has a finite number of elements, such as $\{ 1, 3, 5 \}$, and a *countably infinite set* can be put in one-to-one correspondence with the set of natural numbers, $\{1,2,3,4,5,\ldots\}$.
+The cardinality of a set $\mathbb{A}$, denoted by $|\mathbb{A}|$, is a measure on the number of elements in the set, e.g., $|\{a,b\}|=2$.
+
+A map represents a *many*-to-*one* relationship. A map that associates elements in $\mathbb{X}$ to elements in $\mathbb{Y}$ has a type denoted by $\mathbb{X}\mapsto\mathbb{Y}$.
+For a map of type $X \mapsto Y$, we denote $X$ the *input* and $Y$ the output.
+Typically, it is relatively easy to find which output is associated with a given
+input, but the inverse operation, determining which inputs are associated with a
+given output is computationally harder.
+Of course, this is not necessarily the case, and mathematically the map is just
+a one-to-many relation over $X \times Y$.
+
+For instance, Table \ref{tbl:tabfunc} depicts a function over a finite domain of $n$
+elements, where each input $x \in X$ is associated with a single output
+$y \in Y$, i.e., $y = f(x)$.
+
+\begin{table}
+    \centering
+    \caption{Function $\operatorname{negate} \colon \{0,1\} \mapsto \{0,1\}$}
+    \label{tbl:tabfunc}
+    \begin{tabular}{|c c|} 
+        \hline
+        Input ($\{0,1\}$) & Output ($\{0,1\}$)\\
+        \hline
+        $0$ & $1$\\
+        $1$ & $0$\\    
+        \hline
+    \end{tabular}
+\end{table}
+
+The input does not need to be a simple set like natural numbers, but rather can be any type of set, such as a set of pairs as given in Table \ref{tbl:tabfun2}.
+
+\begin{table}
+\centering
+\caption{Function $\operatorname{f} \colon X \mapsto Y$\\defined over a *finite* domain $X$}
+\label{tbl:tabfunc2}
+\begin{tabular}{|c c|} 
+\hline
+Input ($\{0,1\} \times \{0,1\}$) & Output ($\{0,1\}$)\\
+\hline
+    $(0,0)$ & $0$\\
+    $(0,1)$ & $1$\\
+    $(1,0)$ & $1$\\
+    $(1,1)$ & $0$\\    
+\hline
+\end{tabular}
+\end{table}
+
+
+Since we are interested in constructing maps in computer memory, we must have some way to represent them.
+One technique may be given by the following table.
+
+\begin{table}
+\centering
+\caption{Function $\operatorname{f} \colon \{0,1\} \mapsto \{0,1\}$ where $b : \{0,1\} \mapsto \{0,1\}^*$ is the encoder for $\mathbb{Y}$}
+\label{tbl:tabfunc}
+\begin{tabular}{|c c c|} 
+\hline
+Input ($\mathbb{X}$) & Output ($\mathbb{Y}$) & Encoding ($\mathcal{B}$)\\
+\hline
+    $x_1$ & $y_1$ & $b_1$\\
+    $x_2$ & $y_2$ & $b_2$\\
+    $x_3$ & $y_3$ & $b_3$\\
+    $\vdots$ & $\vdots$ & $\vdots$\\
+    $x_n$ & $y_n$ & $b_n$\\
+\hline
+\end{tabular}
+\end{table}
+
+
+
+The oblivious map is given by the following definition.
+\begin{definition}
+The *oblivious Bernoulli map* is a specialization of the Bernoulli map. We
+denote an oblivious map of $f$ by $f^* = (f,\mathcal{C})$ where $\mathcal{C}$ is the
+subset of the computational basis of $f$ which $f^*$ provides.
+An oblivious Bernoulli map satisifes the following conditions:
+
+- The function $f^* : X \mapsto Y$ is a Bernoulli map of $f$.
+    
+- If an element of $x \in X$ is not in the domain of definition,
+  $f(x)$ is a random oracle over $Y$
+  
+- A particular mapping $y = f^*(x)$ may only be learned by applying $f^*$ to $x$.
+
+In an *oblivious map*, a mapping (row in the table) is only learned upon request.
+
+Observe that $f^*$ is an oblivious value. Typically, we are also interested in
+functions in which the domain and codomain also represent oblivious values, i.e.,
+$$
+f^* : X^* \mapsto Y^*
+$$
+where $X^* = (X,\mathcal{C}_1)$, $Y^* = (Y,\mathcal{C}_2)$, and $f^* = (f,\mathcal{C}_3)$.
+
+It may be the case that $X^*$ is a set of oblivious integers that, say, only
+supports testing equality and addition. Of course, once we have addition, we may
+also implement multiplication, powers, and many other operations.
+
+The space complexity of the Bernoulli map with an error
+rate $\operatorname{error\_rate}(\hat{f}, x)$ is given by the following theorem.
+::: {.theorem}
+The space complexity of the Bernoulli map with an error...
+:::
+
+## Abstract data type
+A *type* is a set and the elements of the set are called the *values* of the
+type.
+An *abstract data type* is a type and a set of operations on values of the type.
+For example, the *integer* abstract data type is the set of all integers and a
+set of standard operations (computational basis) such as addition, subtraction,
+and multiplication.
+
+A *data structure* is a particular way of organizing data and may implement one
+or more abstract data types.
+An *immutable* data structure has static state; once constructed, its state does
+not change until it is destroyed.
+Let $\hat{f} : X \mapsto Y$ model the concept of a Bernoulli approximation of
+$f : X \mapsto Y$.
+Then,
+
+- $\hat{f}(x)$
+
+  Returns a value in $Y$.
+
+- $\operatorname{error\_rate}(\hat{f},x)$.
+
+  Returns the *error rate* of $\hat{f}$ applied to $x$, i.e.,
+  $$
+      \Pr\{\hat{f}(x) = f(x)\} = \operatorname{error\_rate}(\hat{f},x)
+  $$
+  for every $x \in \operatorname{dom}(f)$.
+
+The **Singular Hash Map**
+=========================
+
+The **Singular Hash Set** is a theoretical data structure that provides an optimal
+implementation of the *oblivious map* ADT. A more practical implementation is
+given by the Perfect Map Filter [@pmf].
+
+We consider sets in which the universe of elements is given by the countably infinite set of all bit strings.
+::: {.definition}
+The countably infinite set of all bit strings is denoted by $B^* = \{0,1\}^*$,
+where $*$ denotes all non-negative integers.
+:::
+A finite subset of $B^*$ is given by the following definition.
+::: {.definition}
+The finite set of all bit strings of length $n$ is denoted by
+\begin{equation}
+    B^n = \bigl\{b \colon b \in \{0,1\}^n\bigr\}
+\end{equation}
+with a cardinality given by $|B^n| = 2^n$.
+:::
+
+A hash function is related to countable sets $B$ and $B_n$ and is given by the following definition.
+::: {.definition}
+A hash function $\operatorname{hash} : B^* \mapsto B^n$ is a function such that
+all bit strings of arbitrary-length are mapped (hashed) to bit strings of
+fixed-length $n$.
+:::
+For a given $x \in B^*$, $y = \operatorname{hash}(x) \in B_n$ is denoted the hash of $x$.
+
+The Singular Hash Map depends on a random oracle as given by the following definition.
+
+::: {.definition #def:randomoracle}
+A random oracle of type $B^* \mapsto B^*$, is a theoretical hash function whose
+output is uniformly distributed over the elements of $B^n$.
+:::
+
+The hash function $\operatorname{hash} : B^* \mapsto B^n$ approximates a
+truncated random oracle (the first $n$ bits) and has a space complexity given by
+$\mathcal{O}(1)$.
+
+The bit length of objects is given by the following definition.
+::: {.definition}
+The bit length of an object $x$ is denoted by $\ell(x)$.
+:::
+
+For example, the bit length of an object $x \in B^n$ is $\ell(x) = n$.
+
+Space-optimal implementation of $\operatorname{cipher\_map}$.
+
+```{c++, eval=F}
+auto build_entropy_map(
+    auto iterable xs,
+    auto prefix_decoder d,
+    auto random_oracle h)
+{
+  auto l = 0;
+  while (true)
+  {
+    auto error = false;
+    for (auto x : xs)
+    {
+      auto hash = h(l) ^ h(x);
+      auto v = d(hash);
+      error = (v != x) || error;
+    }
+    if (!error)
+      break;
+    l = succ(l)
+  }
+  return hash_map<H,D>(h,d,l);
+}
+```
+
+The function `h` models the concept of a random oracle.
+The function `d` models the concept of a prefix-free decoder for values in the
+iterable collection `xs`.
+The value of `hash` is thus an infinite random bit string that is a function of
+`l` and `x`. (Note that we may model random oracles using lazy evaluation.)
+Since `d` is a prefix-free decoder, then for a given `y` in `Y`, it has a
+prefix-free encoding that is equal to some particular hash. 
+The probability that `d(hash)` decodes `y` is thus $p(y) = 2^{-|y'|}$
+where $y'$ is the encoding for $y$.
+Thus, the probability that $y$ in $f($`xs`$)$ decodes successfully is given by
+$$
+q = \prod_{i=1}^n p(y_i) = 2^{-\sum_{i=1}^n |y_i'|}.
+$$
+Thus, each trial for a given $l$ has a probability of success $q$.
+That is, it is geometrically distributed, and the number of trials are given
+by the random variable
+$$
+L = \operatorname{GEO}(q),
+$$
+which has the expected value
+$$
+\frac{1}{q} = 2^{\sum_{i=1}^n |y_i'|}.
+$$
+
+Suppose $|y_i|$ are all equal to $k$, e.g., the $y$'s are uniformly distributed
+and the best prefix-free coder gave them all the same length $k$.
+Then, $2^{n k}$ trials are expected.
+
+Finally, there is also an opportunity to verify that some values map correctly,
+e.g., for values with the smallest encoding length, skip them, and count
+on the fact that it maps correctly with some probability.
+For instance, if the Bernoulli map is the set indicator function for $X$,
+then $X^C$ map to `false` and we can provide a short encoding for that, say
+...
+
+
+\begin{figure}
+    \centering
+    \input{img/fig_shmap.tex}
+    \caption{Singular Hash Map}
+    \label{fig:shmap}
+\end{figure}
+
+We consider a family of approximate maps which are given by the output of the random oracle applied to the input $x \in \Mt$ concatenated with a bit string $b \in B^*$ such that all $x \in S$ map to the same hash. We describe the generative algorithm in Algorithm \ref{alg:ph}. Note that in Algorithm \ref{alg:shmap}, the concatenation of two bit strings $x$ and $y$ is denoted by $x y$.
+
+
+The value $v_i$ has a self-terminating encoding. Thus, we need only check that the bit string that encodes $v_i$ is equal to a hash of the key (concatenated with another $1$ and another bit string $b$).
+
+
+The space required for the SHM found by Algortihm \ref{alg:shmap} is of the order of the length $n$ of the bit string $b$. Therefore, for space efficiency, the algorithm exhaustively searches for a bit string in the order of increasing size $n$.
+
+## Theoretical Analysis
+The set proves that the keys in $M_p$ are an approximate set of the keys in $M_t$.
+
+::: {.theorem}
+The probability that a particular bit string $b \in B^*$ successfully codes the SHM is given by
+\begin{equation}
+    p(m,\varepsilon,\mu) = \frac{\varepsilon^{m-1}}{2^{m \mu}}.
+\end{equation}
+:::
+
+::: {.proof}
+In Algorithm \ref{alg:shmap}, for a particular bit string $b_n$, the joint probability that every key in $M$ collides and for each key $k$ in $\Mt$, the concatenation of $1$ and $k$ has a hash in which the first $\ell(v)$ bits collide with mapped value $v$ is given by the following reasoning.
+
+Suppose we have a set $M = \{(k_1,v_1),\ldots,(k_m,v_m)\}$ and $k_1$ hashes to $y = h(k_1) \mod t$, where
+$h : B^* \mapsto B^N$ is a random hash function that uniformly distributes over its domain of $2^N$ possibilities and
+$N < \max{\ell(v_1),\ldots,\ell(v_m)}$.
+The probability that $h(1 + k_1) \mod \ell(v_1) = v_1$ is $\frac{1}{2^{\ell(v_1)}}$.
+Since $y$ is a particular element in $B^k$, the probability that $k_j, j \neq 1$, hashes to $y$ is $\frac{1}{2^k}$.
+The probability that $1 \catop k_j, j \neq 1$ hashes to $v_j$ is $\frac{1}{2^{\ell(v_j)}}$.
+Since $h$ is a random hash function, every one of these probabilities are independent, and thus the joint probability is just the product given by
+\begin{align}
+    p &= \frac{1}{2^{k(m-1)}} \prod_{j=1}^{m} \frac{1}{2^{\ell(v_j)}}\\
+      &= \varepsilon^{m-1} \frac{1}{2^{\sum_{j=1}^{m} \ell(v_j)}}.
+\end{align}
+The average bit length per key is given by
+\begin{equation}
+    \mu = \frac{1}{m} \sum_{j=1}^{m} \ell(v_j)
+\end{equation}
+and thus the probability $p$ may be parameterized as
+\begin{equation}
+    p = \frac{\varepsilon^{m-1}}{2^{m \mu}}.
+\end{equation}
+:::
+
+::: {.theorem}
+Given false positive and false negative domain error rates given by $\varepsilon$ and $\eta$ respectively, and a mean bit length $\mu$ of encodings of elements in the image of $\Afun$, the expected bit length of the Singular Hash Map asymptotically obtains a space complexity with a lower-bound given by
+\begin{equation}
+    -(1 - \eta) \log_2 \varepsilon + (1 - \eta) \mu
+\end{equation}
+bits per element, which occurs when the encodings have uniformly distributed bit lengths, and an upper-bound given by
+\begin{equation}
+    -(1 - \eta) \log_2 \varepsilon + \mu
+\end{equation}
+ bits per element, which occurs when the encodings have degenerate bit lengths. The greater the entropy of the bit lengths, the smaller the expected bit length given a mean of $\mu$. 
+:::
+
+::: {.proof}
+The space required for the SHS found by Algorithm \ref{alg:makeset} is of the order of the length $n$ of the bit string $b_n$. Therefore, for space efficiency, the algorithm exhaustively searches for a bit string in the order of increasing size $n$.
+
+We are interested in the first case when a success occurs, which is a geometric distribution with probability of success $p$ as given by
+\begin{equation}
+    Q \sim \geodist\bigl(p = \frac{\varepsilon^{m-1}}{2^{m \mu}}\bigr).
+\end{equation}
+The expected number of trials for the geometric distribution is given by
+\begin{equation}
+\label{eq:exp_trials}
+    E[Q] = \frac{2^{m \mu}}{\varepsilon^{m-1}}.
+\end{equation}
+By Definition \ref{def:mapping}, the $n$-th trial uniquely maps to a bit string of length $m = \lfloor \log_2 n \rfloor$. Thus, the expected bit length is given approximately by
+\begin{equation}
+    E[\log_2 Q] = \log_2 \frac{2^{m \mu}}{\varepsilon^{m-1}}\; \si{bits}.
+\end{equation}
+Dividing by $m$ and simplifying results in
+\begin{equation}
+    -\frac{m-1}{m} \log_2 \varepsilon + \mu\; \si{bits \per element}.
+\end{equation}
+Asymptotically, as $m \to \infty$, the bits per element goes to
+\begin{equation}
+    -\log_2 \varepsilon + \mu.
+\end{equation}
+:::
+
+The smaller the bit lengths generated by the encoder, the smaller the SHM. However, optimal encoders reveal information about the values in the SHM, which goes against the principle of the obvlivious function. For instance, if each input $x$ mapped to a list of numbers, then an optimal encoder will generate codes that minimize the length of the list, say a Huffman code. However, by analyzing the Huffman codes produced by the encoder, we may infer the distribution of the lists. Thus, for the sake of maintaining an oblivious state, the encoder should generate codes as though the values were uniformly distributed.
+
+
+
+<!--chapter:end:index.Rmd-->
+
