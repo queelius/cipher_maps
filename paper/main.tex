@@ -64,11 +64,474 @@ We define the semantics of the \emph{oblivious map}, which is a \emph{probabilis
 \listoffigures
 \listofalgorithms
 
-\subfile{sections/intro}
-\subfile{sections/oblivious_map}
-\subfile{sections/singular_hash_map}
-\subfile{sections/apps}
-\subfile{sections/appendix}
+\section{Introduction}
+\label{sec:intro}
+
+Intro here.
+
+
+\section{Oblivious Maps}
+\label{sec:map}
+A set is an unordered collection of distinct elements, typically from some implicitly understood universe.
+A countable set is a \emph{finite set} or a \emph{countably infinite set}. A \emph{finite set} has a finite number of elements, such as $\{ 1, 3, 5 \}$, and 
+a \emph{countably infinite set} can be put in one-to-one correspondence with the set of natural numbers, $\{1,2,3,4,5,\ldots\}$.
+The cardinality of a set $\mathbb{A}$, denoted by $|\mathbb{A}|$, is a measure on the number of elements in the set, e.g., $|\{a,b\}|=2$.
+
+A map represents a \emph{many}-to-\emph{one} relationship. A map that associates elements in $\mathbb{X}$ to elements in $\mathbb{Y}$ has a type denoted by $\mathbb{X}\mapsto\mathbb{Y}$.
+For a map of type $\mathbb{X} \mapsto \mathbb{Y}$, we denote $\mathbb{X}$ the \emph{input} and $\mathbb{Y}$ the output.
+Typically, it is relatively easy to find which output is associated with a given input, but the inverse operation, determining which inputs are associated with a given output is computationally harder.
+Of course, this is not necessarily the case, and mathematically the map is just a one-to-many relation over $\mathbb{X} \times \mathbb{Y}$.
+
+For instance, \Cref{tbl:tabfunc} depicts a function over a finite domain of $n$ elements, where each input $x \in X$ is associated with a single output $y \in Y$, i.e., $y = \Fun(x)$.
+
+\begin{table}
+    \centering
+    \caption{Function $\operatorname{negate} : \{0,1\} \mapsto \{0,1\}$}
+    \label{tbl:tabfunc}
+    \begin{tabular}{|c c|} 
+        \hline
+        Input ($\{0,1\}$) & Output ($\{0,1\}$)\\
+        \hline
+        $0$ & $1$\\
+        $1$ & $0$\\    
+        \hline
+    \end{tabular}
+\end{table}
+
+The input does not need to be a simple set like natural numbers, but rather can be any type of set, such as a set of pairs as given in \Cref{tbl:tabfun2}.
+
+\begin{table}
+\centering
+\caption{Function $\operatorname{f} : \X \mapsto \Y$\\defined over a \emph{finite} domain $\X$}
+\label{tbl:tabfunc2}
+\begin{tabular}{|c c|} 
+\hline
+Input ($\{0,1\} \times \{0,1\}$) & Output ($\{0,1\}$)\\
+\hline
+    $(0,0)$ & $0$\\
+    $(0,1)$ & $1$\\
+    $(1,0)$ & $1$\\
+    $(1,1)$ & $0$\\    
+\hline
+\end{tabular}
+\end{table}
+
+
+Since we are interested in constructing maps in computer memory, we must have some way to represent them.
+One technique may be given by the following table.
+
+\begin{table}
+\centering
+\caption{Function $\operatorname{f} : \{0,1\} \mapsto \{0,1\}$ where $b : \{0,1\} \mapsto \{0,1\}^*$ is the encoder for $\mathbb{Y}$}
+\label{tbl:tabfunc}
+\begin{tabular}{|c c c|} 
+\hline
+Input ($\mathbb{X}$) & Output ($\mathbb{Y}$) & Encoding ($\cisb$)\\
+\hline
+    $x_1$ & $y_1$ & $b_1$\\
+    $x_2$ & $y_2$ & $b_2$\\
+    $x_3$ & $y_3$ & $b_3$\\
+    $\vdots$ & $\vdots$ & $\vdots$\\
+    $x_n$ & $y_n$ & $b_n$\\
+\hline
+\end{tabular}
+\end{table}
+
+
+
+The oblivious map is given by the following definition.
+\begin{definition}
+The \gls{gls-obliviousmap} abstract data type is a specialization of the approximate map. We denote an oblivious map of $\Mt$ by $\Mpp$. An \emph{oblivious map} $\Mpp$ of $\Mt$ must satisfy the following conditions:
+\begin{enumerate}
+    \item $\AT{f} : \AT{X \mapsto Y}$ is a random approximate map of $f : X \mapsto Y$ with a specified false positive rate $\varepsilon$.
+    \item There is no way to efficiently iterate over the domain of definition $X$.
+    \item If an element of $x \in X$ is not in the domain of definition, $f(x)$ is a random oracle over $Y$
+    \item A particular mapping $y = f(x)$ may only be learned by evaluating the function $f(x)$.
+    \item Any estimator of the cardinality of the domain of definition that only uses the information in an object's binary representation may only be able determine an approximate specifiable upper-bound $u \geq m$ as a function of the entropy and the \emph{efficiency} of the representation, i.e., the most efficient representation has a very precise estimator of the cardinality of the domain of definition.
+\end{enumerate}
+\end{definition}
+In an \emph{oblivious map}, a mapping (row in the table) is only learned upon request.
+
+By \cref{dummyref}, the space complexity of the \emph{oblivious map} with a false positive rate $\varepsilon > 0$ and a false negative rate $\eta = 0$ is given by the following postulate.
+\begin{postulate}
+Space complexity
+\begin{equation}
+    -\log_2 \varepsilon + \mu \; \si{bits \per value},
+\end{equation}
+where $\varepsilon$ is the false positive rate and $\mu$ is the mean \emph{marginal} entropy that a positive key maps to.
+\end{postulate}
+
+The cardinality of $\Mt$ is uniformly distributed between $0$ and The upper-bound $u$. Thus, the entropy of the cardinality is $\log_2(u+1)$. Thus, entropy may be traded for efficiency. For the optimal oblivious map, the relative efficiency to an approximate map where the entropy of the values in the key-value pairs is on average $\mu$ per value is given by
+\begin{equation}
+    \frac{\log_2 \varepsilon + \mu}{\frac{u}{m}\log_2 \varepsilon + \mu}\,.
+\end{equation}
+If $u = m$, then its relative efficiency is $1$. If $\mu = 0$, e.g., an approximate set, then the relative efficiency is given by
+\begin{equation}
+    \frac{m}{u}\,.
+\end{equation}
+
+\subsection{Abstract data type}
+A \emph{type} is a set and the elements of the set are called the \emph{values} of the type. An \emph{abstract data type} is a type and a set of operations on values of the type. For example, the \emph{integer} abstract data type is the set of all integers and a set of standard operations such as addition and subtraction.
+
+A \emph{data structure} is a particular way of organizing data and may implement one or more abstract data types. An \emph{immutable} data structure has static state; once constructed, its state does not change until it is destroyed. The abstract data type of the \emph{immutable} approximate map is given by the following definition..
+\begin{definition}
+The \emph{static map} is an abstract data type of the \emph{immutable} map. Any of the following operations may be supported:
+\begin{enumerate}
+    \item \HasKey{$\Mp$,$k$}. Returns $\True$ if $(k,v') \in \Mt$ for any $v'$. Otherwise, \False.
+    \item \Find{$\Mp$,$k$}. Returns $v$ if $(k,v) \in \Mt$ for any $v$. Otherwise, returns some unspecified $v'$ with probability $\varepsilon$ and $\nullvalue$ with probability $1 - \varepsilon$.
+    \item \Cardinality{$\Mp$}. Returns the \emph{expected} cardinality $(1 - \varepsilon) \card{\Mt} + \varepsilon \card{\mathbb{X}}$.
+    \item \Count{$\Mt$}. Returns $\card{\Mt}$.
+    \item \fprate{$\Mp$}. Returns the \emph{\gls{gls-fprate}} of $\Mp$.
+\end{enumerate}
+\end{definition}
+
+
+
+
+
+\section{The \emph{Singular Hash Map}}
+The \emph{Singular Hash Set} is a theoretical data structure that provides an \emph{optimal} implementation of the \emph{oblivious map} abstract data type. A more practical implementation is given by the \emph{Perfect Map Filter}\cite{pmf}.
+
+We consider sets in which the universe of elements is given by the \emph{countably infinite} set of all bit strings.
+\begin{definition}
+The countably infinite set of all bit strings is denoted by
+\begin{equation}
+    \cisb = \left\{b : b \in \left\{0,1\right\}^*\right\},
+\end{equation}
+where $*$ denotes all non-negative integers.
+\end{definition}
+A \emph{finite} subset of $\cisb$ is given by the following definition.
+\begin{definition}
+The \emph{finite set} of all bit strings of length $n$ is denoted by
+\begin{equation}
+    \cisb_n = \left\{b : b \in \left\{0,1\right\}^n\right\}
+\end{equation}
+with a cardinality given by
+\begin{equation}
+    \card{\cisb_n} = 2^n\,.
+\end{equation}
+\end{definition}
+
+A \emph{hash function} is related to countable sets $\cisb$ and $\cisb_n$ and is given by the following definition.
+\begin{definition}
+A \emph{hash function} $\hash : \cisb \mapsto \cisb_n$ is a function such that all bit strings of arbitrary-length are mapped (hashed) to bit strings of fixed-length $n$.
+\end{definition}
+For a given $x \in \cisb$, $y = \hash{x} \in \cisb_n$ is denoted the \emph{hash} of $x$.
+
+
+The \gls{gls-shmap} depends on a random oracle as given by the following definition.
+\begin{definition}
+\label{def:randomoracle}
+A random oracle, denoted by $\ro : \cisb \mapsto \cisb_n$, is a theoretical \emph{hash function} whose output is uniformly distributed over the elements of $\cisb_n$.
+\end{definition}
+\begin{assumption}
+The hash function $\hash$ approximates a random oracle $\ro$ and has a space complexity given by $\mathcal{O}(1)$.
+\end{assumption}
+
+The bit length of objects is given by the following definition.
+\begin{definition}
+The bit length of an object $x$ is denoted by
+\begin{equation}
+    \BL(x)\,.
+\end{equation}
+\end{definition}
+For example, the bit length of an object $x \in \cisb_n$ is given by $\BL(x) = n$.
+
+\begin{algorithm}[h]
+    \caption{Theoretical implementation of \protect\MakeApproxMap}
+    \label{alg:shmap}
+    \SetKwProg{func}{function}{}{}
+    \KwIn
+    {
+        $\Fun = \{\left(x,\Fun(x)\right) : x \in \X \}$ is the function defined as a set of ordered pairs, $\varepsilon$ is the \emph{false positive} domain error rate, and $\eta$ is the \emph{false negative} domain error rate.
+    }
+    \KwOut
+    {
+        An \emph{oblivious} function $\Afun$ with an approximate domain with a \emph{false positive} rate $\varepsilon$ and \emph{false negative} rate less than or equal to $\eta$.
+    }
+    \SetKwData{found}{found}
+    \SetKwData{truecode}{true\_code}
+    \SetKwData{code}{test\_code}
+    \func{\MakeApproxMap{$\Fun$, $\varepsilon$}}
+    {
+        $\Mt_{\cisb \times \cisb} \gets \left\{\left(\Encode_{\X \mapsto \cisb}\!\left(x\right),\Encode_{\Y \mapsto \cisb}(\Fun(x))\right) : x \in \X\right\}$\;
+        $p \gets (1 - \eta) \card{\X}$\;
+        $k \gets -\log_2 \varepsilon$\;
+        \For{$n \gets 0$ \KwTo $\infty$}
+        {
+            $\found \gets \True$\;
+            \For{$j \gets 1$ \KwTo $2^n$}
+            {
+                $b_n \gets$ draw random bit string of length $n$ from $\cisb_n$ without replacement\;
+                $\hash(z) \equiv \ro(z \catop b_n)$\;
+                \tcp{A minimum of $p$ inputs must have the same
+                hash.}
+                $\mathbb{M} \gets \text{all subsets of $p$ elements from $\Mt_{\cisb \times \cisb}$}$\;
+                \For{$\mathbb{P} \in \mathbb{M}$}
+                {
+                    \tcp{Let the $p$ elements in $\mathbb{P}$ be denoted by $\left(x^{(1)}, y^{(1)}\right),\ldots,\left(x^{(p)},y^{(p)}\right)$.}
+                    $h_k \gets \hash(x) \mod k$\;
+                    \For{$i \gets 2$ \KwTo $p$}
+                    {
+                        \If{$\hash(x^{(i)}) \mod k \neq h_k$}
+                        {
+                            $\found \gets \False$\;
+                        }
+                        \tcp{$\Encode_{\mathbb{Y} \mapsto \cisb}$ is a {self-delimiting} coder so we only check that the first $\BL(y^{(i)})$ bits of the hash are equal to $y^{(i)}$.}
+                        $\code \gets \hash(1 \catop x_i) \mod \BL(y^{(i)})$\;
+                        \If{$\code \neq y^{(i)}$}
+                        {
+                            \label{line:selfterm}
+                            $\found \gets \False$\;
+                        }
+                    }
+                    \If{\found}
+                    {
+                        \tcp{This tuple codes the \gls*{gls-shmap}.}
+                        \Return $(h_k,b_n)$\;
+                    }
+                }
+            }
+        }
+    }
+\end{algorithm}
+
+\begin{algorithm}[h]
+    \caption{Theoretical implementation of \protect\Find}
+    \label{alg:shmapfind}
+    \SetKwProg{func}{function}{}{}
+    \KwIn
+    {
+        $\Mp \in \mathbb{X} \times \mathbb{Y}$ is the \emph{\gls{gls-shmap}} with a \emph{\gls{gls-fprate}} $\varepsilon$.
+    }
+    \KwOut
+    {
+        If $x \in \mathbb{X}$ is a key in $\Mt$, then the \emph{value} in $\mathbb{Y}$ mapped to by $x$ is returned. Otherwise, with probability $\varepsilon$, $k$ is a false positive and maps to a \emph{random} bit string and with probability $1-\varepsilon$, the \emph{null value} is returned.
+    }
+    
+    \SetKwData{Code}{code}
+    \SetKwData{Success}{success}
+    \func{\Find{$\Mp$, $x$}}
+    {
+        \tcp{The \emph{\gls{gls-shmap}} is coded by the tuple $(h_1,b_n)$ as given by \Cref{alg:shmap}.}
+        $\ell \gets \BL(h_1)$\;
+        $\Code_x \gets \Encode_{\mathbb{X} \mapsto \cisb}(x)$\;
+        \If{$\hash(\Code_x) \mod \ell \neq h_1$}
+        {
+            \Return \nullvalue\;
+        }
+        
+        
+        $\Code_{x'} \gets \hash(1 \catop x) \mod j$\;
+        \tcp{We assume the true code associated with $x$ is the result of a \emph{self-delimiting} coder which can be decoded by $\Decode : \cisb \mapsto \mathbb{Y}$.}
+        $(\Success, y) \gets \Decode_{\cisb \mapsto \mathbb{Y}}(\Code_y)$\;
+        \If{\Success}
+        {
+            \tcp{Since $k$ may be a false positive, $v$ may be a random bit string with a length $\ell \in [c,N], 0 \leq c \leq N$, where $c$ depends upon the self-delimiting coder.}
+            \Return $y$\;
+        }
+    }
+\end{algorithm}
+
+
+\begin{figure}
+    \centering
+    %\input{img/fig_shmap.tex}
+    \caption{\emph{Singular Hash Map}}
+    \label{fig:shmap}
+\end{figure}
+
+We consider a family of \emph{approximate maps} which are given by the output of the random oracle applied to the input $x \in \Mt$ concatenated with a bit string $b \in \cisb$ such that all $x \in \St$ map to the same hash. We describe the generative algorithm in \Cref{alg:ph}. Note that in \Cref{alg:shmap}, the concatenation of two bit strings $x$ and $y$ is denoted by $x \catop y$.
+
+
+In \Cref{alg:shmap} on \Cref{line:selfterm}, the value $v_i$ has a \emph{self-terminating} encoding. Thus, we need only check that the bit string that encodes $v_i$ is equal to a hash of the key (concatenated with another $1$ and another bit string $b$).
+
+
+The space required for the \gls{gls-shmap} found by \Cref{alg:shmap} is of the order of the length $n$ of the bit string $b$. Therefore, for space efficiency, the algorithm exhaustively searches for a bit string in the order of increasing size $n$.
+
+\subsection{Theoretical analysis}
+The \gls{gls-set} proves that the keys in $\Mp$ are an \emph{approximate set} of the keys in $\Mt$.
+
+\begin{theorem}
+The probability that a particular bit string $b \in \cisb$ successfully codes the \gls{gls-shmap} is given by
+\begin{equation}
+    p(m,\varepsilon,\mu) = \frac{\varepsilon^{m-1}}{2^{m \mu}}\,.
+\end{equation}
+\end{theorem}
+\begin{proof}
+In \Cref{alg:shmap}, for a particular bit string $b_n$, the joint probability that every key in $\Mt$ collides and for each key $k$ in $\Mt$, the concatenation of $1$ and $k$ has a hash in which the first $\BL(v)$ bits collide with mapped value $v$ is given by the following reasoning.
+
+Suppose we have a set $\Mt = \{(k_1,v_1),\ldots,(k_m,v_m)\}$ and $k_1$ hashes to $y = \hash(k_1) \mod t$, where $\hash : \cisb^* \mapsto \cisb_N$ is a random hash function that uniformly distributes over its domain of $2^N$ possibilities and $N < \max{\BL(v_1),\ldots,\BL(v_m)}$.
+
+The probability that $\hash(1 \catop k_1) \mod \BL(v_1) = v_1$ is given by
+\begin{equation}
+    \frac{1}{2^{\BL(v_1)}}\,.
+\end{equation}
+Since $y$ is a particular element in $\cisb_k$, the probability that $k_j, j \neq 1$, hashes to $y$ is given by
+\begin{equation}
+    \frac{1}{2^k}\,.
+\end{equation}
+The probability that $1 \catop k_j, j \neq 1$ hashes to $v_j$ is given by
+\begin{equation}
+    \frac{1}{2^{\BL(v_j)}}\,.
+\end{equation}
+Since $\hash$ is a random hash function, every one of these probabilities are independent, and thus the joint probability is just the product given by
+\begin{align}
+    p &= \frac{1}{2^{k(m-1)}} \prod_{j=1}^{m} \frac{1}{2^{\BL(v_j)}}\\
+      &= \varepsilon^{m-1} \frac{1}{2^{\sum_{j=1}^{m} \BL(v_j)}}\,.
+\end{align}
+The average bit length per key is given by
+\begin{equation}
+    \mu = \frac{1}{m} \sum_{j=1}^{m} \BL(v_j)
+\end{equation}
+and thus the probability $p$ may be parameterized as
+\begin{equation}
+    p = \frac{\varepsilon^{m-1}}{2^{m \mu}}\,.
+\end{equation}
+\end{proof}
+
+\begin{theorem}
+Given \emph{false positive} and \emph{false negative} domain error rates given by $\varepsilon$ and $\eta$ respectively, and a mean bit length $\mu$ of encodings of elements in the image of $\Afun$, the \emph{expected} bit length of the Singular Hash Map asymptotically obtains a space complexity with a lower-bound given by
+\begin{equation}
+    -(1 - \eta) \log_2 \varepsilon + (1 - \eta) \mu \; \si{bits \per element},
+\end{equation}
+which occurs when the encodings have uniformly distributed bit lengths, and an upper-bound given by
+\begin{equation}
+    -(1 - \eta) \log_2 \varepsilon + \mu \; \si{bits \per element},
+\end{equation}
+which occurs when the encodings have degenerate bit lengths. The greater the entropy of the bit lengths, the smaller the expected bit length given a mean of $\mu$. 
+\end{theorem}
+\begin{proof}
+The space required for the \gls{gls-shs} found by \Cref{alg:makeset} is of the order of the length $n$ of the bit string $b_n$. Therefore, for space efficiency, the algorithm exhaustively searches for a bit string in the order of increasing size $n$.
+
+We are interested in the first case when a success occurs, which is a geometric distribution with probability of success $p$ as given by
+\begin{equation}
+    \rv{Q} \sim \geodist\!\left(p = \frac{\varepsilon^{m-1}}{2^{m \mu}}\right)\,.
+\end{equation}
+The expected number of trials for the geometric distribution is given by
+\begin{equation}
+\label{eq:exp_trials}
+    \expectation\left[\rv{Q}\right] = \frac{2^{m \mu}}{\varepsilon^{m-1}}\,.
+\end{equation}
+By \Cref{def:mapping}, the \nth trial uniquely maps to a bit string of length $m = \lfloor \log_2 n \rfloor$. Thus, the expected bit length is given approximately by
+\begin{equation}
+    \expectation[\log_2 \rv{Q}] = \log_2 \frac{2^{m \mu}}{\varepsilon^{m-1}}\; \si{bits}\,.
+\end{equation}
+Dividing by $m$ and simplifying results in
+\begin{equation}
+    -\frac{m-1}{m} \log_2 \varepsilon + \mu\; \si{bits \per element}\,.
+\end{equation}
+Asymptotically, as $m \to \infty$, the bits per element goes to
+\begin{equation}
+    -\log_2 \varepsilon + \mu\,.
+\end{equation}
+\end{proof}
+
+The smaller the bit lengths generated by the encoder, the smaller the \emph{Singular Hash Map}. However, optimal encoders \emph{reveal} information about the values in the \emph{Singular Hash Map}, which goes against the principle of the \emph{obvlivious function}. For instance, if each input $x$ mapped to a list of numbers, then an optimal encoder will generate codes that minimize the length of the list, say a Huffman code. However, by analyzing the Huffman codes produced by the encoder, we may infer the distribution of the lists. Thus, for the sake of maintaining an \emph{oblivious} state, the encoder should generate codes as though the values were \emph{uniformly} distributed.
+
+\subsection{Entropy}
+The entropy of the \gls{gls-shmap} is given by the following definition.
+
+
+
+\section{Application: secure indexes in \emph{Encrypted Search}}
+enables untrusted systems to map \glspl{gls-key} to \glspl{gls-value}
+obliviously search documents on behalf of authorized users, where the search query, the confidential documents being searched over, and the search results are equivalent to a random bit sequence.
+
+These requirements may not be fully met in most cases. In this paper, we consider the confidentiality of a document which can be obviously searched.
+
+the untrusted system does not know what the user is searching for, nor what the confidential documents contain. an obvious search is one in which the untrusted system does
+
+One of the earlier papers presented on \gls{es} \cite{Son00} observed that individuals may wish to outsource storage logistics to cloud storage providers but do not trust the providers with confidentiality requirements. 
+To enable an untrusted system to search a confidential document on an authorized user's behalf, the untrusted system must have some sort searchable representation of the document. 
+
+Rank-ordered search. Oblivious sets are more appropriate for Boolean search.
+
+
+
+\section{This section needs title}
+For a particular $n$, each $b \in \cisb_n$ may fail and therefore $n$ is uncertain and takes on particular values with probabilities given by the following theorem.
+\begin{theorem}
+\label{thm:N_pmf}
+The \gls{gls-shs} generator given by \Cref{alg:ph} finds a bit string of random length $\rv{N} = n$ that results in a perfect collision on $\St$ with a probability mass function given by
+\begin{equation}
+\label{eq:N_pmf}
+    \pmf_{\rv{N}}(n \given m, \varepsilon, \mu) = q^{2^n-1}\left(1 - q^{2^n}\right),
+\end{equation}
+where $q = 1 - p(m,\varepsilon,\mu)$, $m = \card{\St}$, and $\varepsilon$ is the false positive rate.
+\end{theorem}
+\begin{proof}
+Each iteration of the loop in \Cref{alg:shmap} has a collision test which is Bernoulli distributed with a probability of success $p(m,\varepsilon,\mu)$. We are interested in the random length $\rv{N}$ of the bit string when this outcome occurs.
+
+For the random variable $\rv{N}$ to realize a value $n$, every bit string smaller than length $n$ must fail and a bit string of length $n$ must succeed. There are $2^n-1$ bit strings smaller than length $n$ and each one fails with probability $q$, and so by the product rule the probability that they all fail is given by
+\begin{equation}
+\label{eq:N_pmf_1}
+    q^{2^n - 1}\,.
+\end{equation}
+
+Given that every bit string smaller than length $n$ fails, what is the probability that every bit string of length $n$ fails? There are $2^n$ bit strings of length $n$, each of which fails with probability $q$ as before and thus by the product rule the probability that they all fail is $q^{2^n}$, whose complement, the probability that not all bit strings of length $n$ fail, is given by
+\begin{equation}
+\label{eq:N_pmf_2}
+    1 - q^{2^n}\,.
+\end{equation}
+By the product rule, the probability that every bit string smaller than length $n$ fails and a bit string of length $n$ succeeds is given by the product of (\ref{eq:N_pmf_1}) and (\ref{eq:N_pmf_2}),
+\begin{equation}
+\label{eq:prob_is_mass}
+    q^{2^n-1}\left(1 - q^{2^n}\right)\,.
+\end{equation}
+For \Cref{eq:prob_is_mass} to be a probability mass function, two conditions must be met. First, its range must be a subset of $[0,1]$. Second, the summation over its domain must be $1$.
+
+The first case is trivially shown by the observation that $q$ is a positive number between $0$ and $1$ and therefore any non-negative power of $q$ is positive number between $0$ and $1$.
+
+The second case is shown by calculating the infinite series
+\begin{align}
+    S &= \sum_{n=0}^{\infty} q^{2^n-1}\left(1-q^{2^n}\right)\\
+      &= \sum_{n=0}^{\infty} q^{2^n-1} - q^{2^{n+1}-1}\,.
+\end{align}
+Explicitly evaluating this series for the first $4$ terms reveals a telescoping sum given by
+\begin{equation}
+    S = (1 - q) + (q - q^3) + (q^3 - q^7) + (q^7 - q^{15}) + \cdots,
+\end{equation}
+where everything cancels except $1$.
+\end{proof}
+
+The expected encoding size is given by the following theorem.
+\begin{theorem}
+\label{thm:open_expect}
+The expected \emph{in-place} (no decoding step) encoding size of the \gls{gls-shs} $\Sp$ is given by
+\begin{equation}
+    \mathcal{O}(1) + \sum_{n=1}^{\infty} q^{2^n-1},
+\end{equation}
+where $q=1 - p(m,\varepsilon,\mu)$, $m = \card{\St}$, $\varepsilon$ is the false positive rate, and $\mu$ is the average bit length of the values in the key-value pairs.
+\end{theorem}
+\begin{proof}
+The hash function $\hash_{\St}$ given by \Cref{alg:ph} finds a bit string of random length $\rv{N} = n$. Thus the encoding size is a discrete random variable given by
+\begin{equation}
+    \mathcal{O}(1) + \rv{N},
+\end{equation}
+where the constant is the space required to encode the random oracle. The expected encoding size is the expectation given by
+\begin{align}
+    \mathcal{O}(1) + \expectation[\rv{N}]\,.
+\end{align}
+By \Cref{thm:N_pmf}, the random variable $\rv{N}$ has a probability mass function given by
+\begin{equation*}
+    \rv{N} \sim \pmf_{\rv{N}}(n \given m,r) = q^{2^n-1}\left(1 - q^{2^n}\right),
+    \tag{\ref{eq:N_pmf} revisited}
+\end{equation*}
+and thus the expectation of $\rv{N}$ is given by
+\begin{align}
+    \expectation\!\left[\rv{N}\right]
+    &= \sum_{n=0}^{\infty} n q^{2^n-1}\left(1 - q^{2^n}\right)\\
+    &= \sum_{n=0}^{\infty} n \left(q^{2^n-1} - q^{2^{n+1}-1}\right)\,.
+\end{align}
+Explicitly evaluating this series for the first $4$ terms reveals a converging sum given by
+\begin{align}
+    \expectation\!\left[\rv{N}\right]
+        &= 0 + (q - q^3) + 2(q^3 - q^7) + 3(q^7 - q^{15}) + \cdots\\
+        &= q + q^3 + q^7 + q^{15} + \cdots\,.
+\end{align}
+\end{proof}
+
 
 \printglossary
 \bibliography{references}

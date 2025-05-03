@@ -1,24 +1,20 @@
 ---
-title: "Universal function Bernoulli approximators "
-output: 
- bookdown::pdf_book:
+title: "Universal Function Bernoulli Approximations: The Hash Map"
+format: 
+    pdf:
         toc: true
-        #latex_engine: xelatex
-        #toc_depth: 3
+        latex_engine: xelatex
+        toc_depth: 2
         number_sections: true
         #extra_dependencies: ["hyperref", "graphicx","amsthm","amsmath","natbib","tikz"]
         extra_dependencies: ["tikz", "caption", "amsthm", "amsmath"]
         df_print: kable
-        #keep_tex: true
+        keep_tex: true
         citation_package: natbib
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
-
-Oblivious maps {#sec:map}
+Oblivious Maps {#sec:map}
 =========================
 A set is an unordered collection of distinct elements, typically from some implicitly understood universe.
 A countable set is a *finite set* or a *countably infinite set*. A *finite set* has a finite number of elements, such as $\{ 1, 3, 5 \}$, and a *countably infinite set* can be put in one-to-one correspondence with the set of natural numbers, $\{1,2,3,4,5,\ldots\}$.
@@ -38,7 +34,7 @@ $y \in Y$, i.e., $y = f(x)$.
 
 \begin{table}
     \centering
-    \caption{Function $\operatorname{negate} \colon \{0,1\} \mapsto \{0,1\}$}
+    \caption{Function $\mathrm{negate} \colon \{0,1\} \mapsto \{0,1\}$}
     \label{tbl:tabfunc}
     \begin{tabular}{|c c|} 
         \hline
@@ -54,7 +50,7 @@ The input does not need to be a simple set like natural numbers, but rather can 
 
 \begin{table}
 \centering
-\caption{Function $\operatorname{f} \colon X \mapsto Y$\\defined over a *finite* domain $X$}
+\caption{Function $\mathrm{f} \colon X \mapsto Y$\\defined over a *finite* domain $X$}
 \label{tbl:tabfunc2}
 \begin{tabular}{|c c|} 
 \hline
@@ -74,7 +70,7 @@ One technique may be given by the following table.
 
 \begin{table}
 \centering
-\caption{Function $\operatorname{f} \colon \{0,1\} \mapsto \{0,1\}$ where $b : \{0,1\} \mapsto \{0,1\}^*$ is the encoder for $\mathbb{Y}$}
+\caption{Function $\mathrm{f} \colon \{0,1\} \mapsto \{0,1\}$ where $b : \{0,1\} \mapsto \{0,1\}^*$ is the encoder for $\mathbb{Y}$}
 \label{tbl:tabfunc}
 \begin{tabular}{|c c c|} 
 \hline
@@ -119,7 +115,7 @@ supports testing equality and addition. Of course, once we have addition, we may
 also implement multiplication, powers, and many other operations.
 
 The space complexity of the Bernoulli map with an error
-rate $\operatorname{error\_rate}(\hat{f}, x)$ is given by the following theorem.
+rate $\mathrm{error\_rate}(\hat{f}, x)$ is given by the following theorem.
 ::: {.theorem}
 The space complexity of the Bernoulli map with an error...
 :::
@@ -144,18 +140,21 @@ Then,
 
   Returns a value in $Y$.
 
-- $\operatorname{error\_rate}(\hat{f},x)$.
+- $\mathrm{error\_rate}(\hat{f},x)$.
 
   Returns the *error rate* of $\hat{f}$ applied to $x$, i.e.,
   $$
-      \Pr\{\hat{f}(x) = f(x)\} = \operatorname{error\_rate}(\hat{f},x)
+      \Pr\{\hat{f}(x) = f(x)\} = \mathrm{error\_rate}(\hat{f},x)
   $$
-  for every $x \in \operatorname{dom}(f)$.
+  for every $x \in \mathrm{dom}(f)$.
 
 The **Singular Hash Map**
 =========================
 
-The **Singular Hash Set** is a theoretical data structure that provides an optimal
+
+The 
+
+The **Singular Hash Map** is a theoretical data structure that provides an optimal
 implementation of the *oblivious map* ADT. A more practical implementation is
 given by the Perfect Map Filter [@pmf].
 
@@ -175,11 +174,11 @@ with a cardinality given by $|B^n| = 2^n$.
 
 A hash function is related to countable sets $B$ and $B_n$ and is given by the following definition.
 ::: {.definition}
-A hash function $\operatorname{hash} : B^* \mapsto B^n$ is a function such that
+A hash function $\mathrm{hash} : B^* \mapsto B^n$ is a function such that
 all bit strings of arbitrary-length are mapped (hashed) to bit strings of
 fixed-length $n$.
 :::
-For a given $x \in B^*$, $y = \operatorname{hash}(x) \in B_n$ is denoted the hash of $x$.
+For a given $x \in B^*$, $y = \mathrm{hash}(x) \in B_n$ is denoted the hash of $x$.
 
 The Singular Hash Map depends on a random oracle as given by the following definition.
 
@@ -188,7 +187,7 @@ A random oracle of type $B^* \mapsto B^*$, is a theoretical hash function whose
 output is uniformly distributed over the elements of $B^n$.
 :::
 
-The hash function $\operatorname{hash} : B^* \mapsto B^n$ approximates a
+The hash function $\mathrm{hash} : B^* \mapsto B^n$ approximates a
 truncated random oracle (the first $n$ bits) and has a space complexity given by
 $\mathcal{O}(1)$.
 
@@ -199,7 +198,7 @@ The bit length of an object $x$ is denoted by $\ell(x)$.
 
 For example, the bit length of an object $x \in B^n$ is $\ell(x) = n$.
 
-Space-optimal implementation of $\operatorname{cipher\_map}$.
+Space-optimal implementation of $\mathrm{cipher\_map}$.
 
 ```{c++, eval=F}
 auto build_entropy_map(
@@ -242,7 +241,7 @@ Thus, each trial for a given $l$ has a probability of success $q$.
 That is, it is geometrically distributed, and the number of trials are given
 by the random variable
 $$
-L = \operatorname{GEO}(q),
+L = \mathrm{GEO}(q),
 $$
 which has the expected value
 $$
@@ -350,7 +349,4 @@ Asymptotically, as $m \to \infty$, the bits per element goes to
 
 The smaller the bit lengths generated by the encoder, the smaller the SHM. However, optimal encoders reveal information about the values in the SHM, which goes against the principle of the obvlivious function. For instance, if each input $x$ mapped to a list of numbers, then an optimal encoder will generate codes that minimize the length of the list, say a Huffman code. However, by analyzing the Huffman codes produced by the encoder, we may infer the distribution of the lists. Thus, for the sake of maintaining an oblivious state, the encoder should generate codes as though the values were uniformly distributed.
 
-
-
-<!--chapter:end:index.Rmd-->
 
